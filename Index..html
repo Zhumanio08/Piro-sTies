@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эмо Таймер | Stockholm</title>
+    <style>
+        /* Сброс стилей */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Основные стили страницы */
+        body {
+            background-color: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        /* Подключение кастомного шрифта */
+        @font-face {
+            font-family: 'MyCustomFont';
+            src: url('fonts/myfont.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        /* Фоновое изображение */
+        .background-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('zxc.jpg') center/cover no-repeat;
+            z-index: -2;
+        }
+        
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: -1;
+        }
+        
+        /* Контейнер таймера */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 380px;
+            padding: 30px;
+            background: rgba(15, 15, 15, 0.8);
+            border-radius: 15px;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.1),
+                0 0 40px rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            transition: all 0.4s ease;
+        }
+        
+        .container:hover {
+            transform: translateY(-8px);
+            box-shadow: 
+                0 0 25px rgba(255, 255, 255, 0.15),
+                0 0 50px rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Заголовок */
+        .title {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-weight: 700;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.7), 
+                0 0 20px rgba(255, 255, 255, 0.5);
+            animation: glow-pulse 3s infinite alternate;
+            font-family: 'MyCustomFont', 'Arial', sans-serif;
+        }
+        
+        /* Отображение таймера */
+        .timer-display {
+            font-size: 76px;
+            text-align: center;
+            font-weight: 700;
+            margin: 20px 0;
+            letter-spacing: 6px;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.7), 
+                0 0 20px rgba(255, 255, 255, 0.5);
+            animation: text-flicker 6s infinite alternate;
+            font-family: 'MyCustomFont', 'Arial', sans-serif;
+        }
+        
+        /* Управление */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        /* Поле ввода */
+        .time-input {
+            background: rgba(20, 20, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 20px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'MyCustomFont', 'Arial', sans-serif;
+        }
+        
+        .time-input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Кнопки */
+        .btn {
+            background: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 14px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 100px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'MyCustomFont', 'Arial', sans-serif;
+        }
+        
+        .btn:hover {
+            background: rgba(50, 50, 50, 0.7);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Текст "Stockholm" на фоне */
+        .stockholm-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 240px;
+            font-weight: 900;
+            opacity: 0.08;
+            z-index: -1;
+            letter-spacing: 20px;
+            pointer-events: none;
+            text-transform: uppercase;
+            /* Умеренное зеленое свечение */
+            text-shadow: 
+                0 0 10px rgba(154, 205, 50),
+                0 0 20px rgba(154, 205, 50);
+            font-family: 'MyCustomFont', 'Arial', sans-serif;
+        }
+        
+        /* Декоративные элементы */
+        .decoration {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .decoration-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .line-horizontal {
+            height: 1px;
+            width: 100%;
+            top: 50%;
+        }
+        
+        .line-vertical {
+            width: 1px;
+            height: 100%;
+            left: 50%;
+        }
+        
+        .glow-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            animation: glow-pulse 2s infinite alternate;
+        }
+        
+        /* Анимации */
+        @keyframes glow-pulse {
+            0% {
+                text-shadow: 
+                    0 0 10px rgba(255, 255, 255, 0.7), 
+                    0 0 20px rgba(255, 255, 255, 0.5);
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+                opacity: 0.3;
+            }
+            100% {
+                text-shadow: 
+                    0 0 15px rgba(255, 255, 255, 0.8), 
+                    0 0 25px rgba(255, 255, 255, 0.6);
+                box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+                opacity: 0.6;
+            }
+        }
+        
+        @keyframes text-flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                opacity: 1;
+                text-shadow: 
+                    0 0 10px rgba(255, 255, 255, 0.7), 
+                    0 0 20px rgba(255, 255, 255, 0.5);
+            }
+            20%, 24%, 55% {
+                opacity: 0.9;
+                text-shadow: 
+                    0 0 8px rgba(255, 255, 255, 0.6), 
+                    0 0 16px rgba(255, 255, 255, 0.4);
+            }
+        }
+        
+        @keyframes slow-float {
+            0% {
+                transform: translate(-50%, -50%) rotate(-25deg) translateY(0);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(-25deg) translateY(-30px);
+            }
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .container { 
+                width: 90%; 
+                padding: 25px; 
+            }
+            .timer-display { 
+                font-size: 64px; 
+            }
+            .stockholm-text { 
+                font-size: 160px; 
+            }
+            .btn { 
+                padding: 12px 0; 
+                font-size: 16px; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-image"></div>
+    <div class="background-overlay"></div>
+    <div class="stockholm-text">Stockholm</div>
+    
+    <div class="decoration">
+        <div class="decoration-line line-horizontal"></div>
+        <div class="decoration-line line-vertical"></div>
+        <div class="glow-dot" style="top: 20%; left: 25%;"></div>
+        <div class="glow-dot" style="top: 70%; left: 80%;"></div>
+        <div class="glow-dot" style="top: 40%; left: 65%;"></div>
+    </div>
+    
+    <div class="container">
+        <h1 class="title" style="color: #154, 205, 50;">Stockholm</h1>
+        
+        <div class="timer-display" id="timer">05:00</div>
+        
+        <input type="text" class="time-input" id="time-input" placeholder="ММ:СС" value="05:00">
+        
+        <div class="controls">
+            <button class="btn" id="start-btn">Старт</button>
+            <button class="btn" id="pause-btn">Пауза</button>
+            <button class="btn" id="reset-btn">Сброс</button>
+        </div>
+    </div>
+    
+    <script>
+        // Элементы DOM
+        const timerDisplay = document.getElementById('timer');
+        const timeInput = document.getElementById('time-input');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        
+        // Переменные состояния таймера
+        let timer;
+        let isRunning = false;
+        let isPaused = false;
+        let remainingTime = 300; // 5 минут в секундах
+        
+        // Форматирование времени (секунды -> ММ:СС)
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Обновление отображения таймера
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(remainingTime);
+        }
+        
+        // Переключение состояния таймера (старт/пауза)
+        function toggleTimer() {
+            if (!isRunning) {
+                // Парсинг введенного времени
+                const input = timeInput.value;
+                const parts = input.split(':');
+                
+                // Проверка формата
+                if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+                    alert('Используйте формат ММ:СС');
+                    return;
+                }
+                
+                const minutes = parseInt(parts[0]);
+                const seconds = parseInt(parts[1]);
+                
+                // Проверка корректности времени
+                if (minutes < 0 || seconds < 0 || seconds > 59) {
+                    alert('Некорректное время');
+                    return;
+                }
+                
+                remainingTime = minutes * 60 + seconds;
+                
+                if (remainingTime <= 0) {
+                    alert('Введите время > 0');
+                    return;
+                }
+                
+                updateDisplay();
+                isRunning = true;
+                isPaused = false;
+                startBtn.textContent = 'Пауза';
+                
+                // Запуск таймера
+                timer = setInterval(() => {
+                    remainingTime--;
+                    updateDisplay();
+                    
+                    // Обработка окончания времени
+                    if (remainingTime <= 0) {
+                        clearInterval(timer);
+                        isRunning = false;
+                        startBtn.textContent = 'Старт';
+                        
+                        // Эффект завершения
+                        timerDisplay.style.color = '#ff5555';
+                        timerDisplay.style.textShadow = '0 0 20px rgba(255, 85, 85, 0.8)';
+                        
+                        setTimeout(() => {
+                            timerDisplay.style.color = '#fff';
+                            timerDisplay.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5)';
+                        }, 3000);
+                    }
+                }, 1000);
+            } else {
+                if (!isPaused) {
+                    // Пауза
+                    clearInterval(timer);
+                    isPaused = true;
+                    startBtn.textContent = 'Продолжить';
+                } else {
+                    // Продолжение
+                    isPaused = false;
+                    startBtn.textContent = 'Пауза';
+                    
+                    timer = setInterval(() => {
+                        remainingTime--;
+                        updateDisplay();
+                        
+                        if (remainingTime <= 0) {
+                            clearInterval(timer);
+                            isRunning = false;
+                            startBtn.textContent = 'Старт';
+                        }
+                    }, 1000);
+                }
+            }
+        }
+        
+        // Сброс таймера
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            isPaused = false;
+            startBtn.textContent = 'Старт';
+            remainingTime = 300;
+            updateDisplay();
+            timeInput.value = '05:00';
+        }
+        
+        // Назначение обработчиков событий
+        startBtn.addEventListener('click', toggleTimer);
+        pauseBtn.addEventListener('click', () => {
+            if (isRunning && !isPaused) {
+                clearInterval(timer);
+                isPaused = true;
+                startBtn.textContent = 'Продолжить';
+            }
+        });
+        resetBtn.addEventListener('click', resetTimer);
+        
+        // Инициализация таймера
+        updateDisplay();
+        
+        // Валидация ввода времени
+        timeInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.slice(0, 4);
+            
+            if (value.length > 2) {
+                this.value = value.slice(0, 2) + ':' + value.slice(2);
+            } else {
+                this.value = value;
+            }
+        });
+        
+        // Плавное появление страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.opacity = 0;
+            let opacity = 0;
+            const fadeIn = setInterval(() => {
+                opacity += 0.05;
+                document.body.style.opacity = opacity;
+                if (opacity >= 1) clearInterval(fadeIn);
+            }, 50);
+        });
+    </script>
+</body>
+</html>
